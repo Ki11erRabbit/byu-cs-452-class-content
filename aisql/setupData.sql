@@ -2,7 +2,7 @@ INSERT INTO Language (languageId, name, styleId, releaseDate) VALUES
 (1, 'Fortran', 1, '1957-01-01'),
 (2, 'C', 2, '1972-01-01'),
 (3, 'C++', 2, '1985-01-01'),
-(4, 'Lisp', 3, '1985-01-01'),
+(4, 'Lisp', 3, '1960-01-01'),
 (5, 'Go', 2, '2009-11-10'),
 (6, 'Python', 4, '1991-02-20'),
 (7, 'Java', 2, '1995-05-23');
