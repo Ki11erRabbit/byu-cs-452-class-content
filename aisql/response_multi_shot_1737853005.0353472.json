@@ -1,0 +1,70 @@
+{
+  "strategy": "multi_shot",
+  "prompt_prefix": "create table Style (\n    styleId integer  NOT NULL primary key,\n    style varchar(50) UNIQUE\n);\n\ncreate table Language (\n    languageId integer  primary key NOT NULL,\n    name varchar(20) not null,\n    styleId integer ,\n    releaseDate DATE not NULL,\n    foreign key (styleId) references Style (styleId)\n);\n\n\ncreate table Creator (\n    creatorId integer  primary Key NOT NULL,\n    creatorName varchar(50) not null,\n    birthDate DATE\n);\n\ncreate table CreatorLanguage (\n    creatorId integer  Not null,\n    languageId integer  Not null,\n    foreign key (languageId) references Language (languageId),\n    foreign key (creatorId) references Creator (creatorId),\n    primary key (languageId, creatorId)\n);\n\ncreate table Paradigm (\n    paradigmId integer  primary Key NOT NULL,\n    paradigm varchar(50) not null UNIQUE\n);\n\ncreate table LanguageParadigm (\n    languageId integer  NOT NULL,\n    paradigmId integer  NOT NULL,\n    foreign key (languageId) references Language (languageId),\n    foreign key (paradigmId) references Paradigm (paradigmId),\n    primary key (languageId, paradigmId)\n);\n\n\n What are the most common birth months for language creators?  \nSELECT TOP(1) WITH TIES, MONTH(birthDate)\nFROM Creator  Give me a sqlite select statement that answers the question. Only respond with sqlite syntax. If there is an error do not expalain it!",
+  "questionResults": [
+    {
+      "context": "I asked a question \"What are the languages that have release dates that are not in January?\" and the response was \"[('Go',), ('Python',), ('Java',)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nSure! Go, Python, and Java have release dates that aren't in January.\n",
+      "question": "What are the languages that have release dates that are not in January?",
+      "sql": "\nSELECT name\nFROM Language\nWHERE strftime('%m', releaseDate) != '01';\n",
+      "queryRawResponse": "[('Go',), ('Python',), ('Java',)]",
+      "friendlyResponse": "Sure! Go, Python, and Java have release dates that aren't in January.",
+      "error": "None"
+    },
+    {
+      "context": "I asked a question \"What are the languages that have release dates that are not in January?\" and the response was \"[('Go',), ('Python',), ('Java',)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nSure! Go, Python, and Java have release dates that aren't in January.\n",
+      "question": "What is the most popular language paradigm?",
+      "sql": "\n-- Most common birth months for language creators\nSELECT strftime('%m', birthDate) AS month, COUNT(*) AS count\nFROM Creator\nGROUP BY month\nORDER BY count DESC;\n\n-- Most popular language paradigm\nSELECT p.paradigm\nFROM Paradigm p\nJOIN LanguageParadigm lp ON p.paradigmId = lp.paradigmId\nGROUP BY p.paradigm\nORDER BY COUNT(lp.languageId) DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[('Go',), ('Python',), ('Java',)]",
+      "friendlyResponse": "Sure! Go, Python, and Java have release dates that aren't in January.",
+      "error": "You can only execute one statement at a time."
+    },
+    {
+      "context": "I asked a question \"What are the languages that have release dates that are not in January?\" and the response was \"[('Go',), ('Python',), ('Java',)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nSure! Go, Python, and Java have release dates that aren't in January.\n",
+      "question": "Which style is the most popular?",
+      "sql": "\nSELECT strftime('%m', birthDate) AS birthMonth, COUNT(*) AS count\nFROM Creator\nGROUP BY birthMonth\nORDER BY count DESC\nLIMIT 1;\n\nSELECT Style.style, COUNT(Language.languageId) AS languageCount\nFROM Style\nJOIN Language ON Style.styleId = Language.styleId\nGROUP BY Style.style\nORDER BY languageCount DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[('Go',), ('Python',), ('Java',)]",
+      "friendlyResponse": "Sure! Go, Python, and Java have release dates that aren't in January.",
+      "error": "You can only execute one statement at a time."
+    },
+    {
+      "context": "I asked a question \"What are the languages that have release dates that are not in January?\" and the response was \"[('Go',), ('Python',), ('Java',)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nSure! Go, Python, and Java have release dates that aren't in January.\nI asked a question \"Which style is the most unique?\" and the response was \"[('01',)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nThe most unique style is \"01.\"\n",
+      "question": "Which style is the most unique?",
+      "sql": "\nWITH counts AS (\n    SELECT strftime('%m', birthDate) AS month, COUNT(*) AS count\n    FROM Creator\n    GROUP BY month\n)\nSELECT month\nFROM counts\nWHERE count = (SELECT MAX(count) FROM counts);\n",
+      "queryRawResponse": "[('01',)]",
+      "friendlyResponse": "The most unique style is \"01.\"",
+      "error": "None"
+    },
+    {
+      "context": "I asked a question \"What are the languages that have release dates that are not in January?\" and the response was \"[('Go',), ('Python',), ('Java',)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nSure! Go, Python, and Java have release dates that aren't in January.\nI asked a question \"Which style is the most unique?\" and the response was \"[('01',)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nThe most unique style is \"01.\"\n",
+      "question": "Which programming language has the median release date?",
+      "sql": "ite\n-- Most common birth months for language creators\nSELECT strftime('%m', birthDate) AS birthMonth\nFROM Creator\nGROUP BY birthMonth\nHAVING COUNT(*) = (\n    SELECT MAX(month_count) FROM (\n        SELECT COUNT(*) AS month_count\n        FROM Creator\n        GROUP BY birthMonth\n    )\n);\n\n-- Programming language with the median release date\nSELECT name\nFROM Language\nWHERE (\n    SELECT COUNT(*)\n    FROM Language\n    WHERE releaseDate < Language.releaseDate\n) = (\n    SELECT COUNT(*)\n    FROM Language\n    WHERE releaseDate > Language.releaseDate\n);\n",
+      "queryRawResponse": "[('01',)]",
+      "friendlyResponse": "The most unique style is \"01.\"",
+      "error": "near \"ite\": syntax error"
+    },
+    {
+      "context": "I asked a question \"What are the languages that have release dates that are not in January?\" and the response was \"[('Go',), ('Python',), ('Java',)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nSure! Go, Python, and Java have release dates that aren't in January.\nI asked a question \"Which style is the most unique?\" and the response was \"[('01',)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nThe most unique style is \"01.\"\nI asked a question \"Which language has the least amount of designers?\" and the response was \"[('Fortran', 1)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nFortran has the least number of designers, with just one.\n",
+      "question": "Which language has the least amount of designers?",
+      "sql": "\nSELECT Language.name, COUNT(CreatorLanguage.creatorId) AS designer_count\nFROM Language\nLEFT JOIN CreatorLanguage ON Language.languageId = CreatorLanguage.languageId\nGROUP BY Language.languageId\nORDER BY designer_count ASC\nLIMIT 1;\n",
+      "queryRawResponse": "[('Fortran', 1)]",
+      "friendlyResponse": "Fortran has the least number of designers, with just one.",
+      "error": "None"
+    },
+    {
+      "context": "I asked a question \"What are the languages that have release dates that are not in January?\" and the response was \"[('Go',), ('Python',), ('Java',)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nSure! Go, Python, and Java have release dates that aren't in January.\nI asked a question \"Which style is the most unique?\" and the response was \"[('01',)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nThe most unique style is \"01.\"\nI asked a question \"Which language has the least amount of designers?\" and the response was \"[('Fortran', 1)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nFortran has the least number of designers, with just one.\n",
+      "question": "Which language has the most amount of designers?",
+      "sql": "ite\nWITH month_counts AS (\n    SELECT strftime('%m', birthDate) AS month, COUNT(*) AS count\n    FROM Creator\n    GROUP BY month\n)\nSELECT month\nFROM month_counts\nWHERE count = (SELECT MAX(count) FROM month_counts);\n",
+      "queryRawResponse": "[('Fortran', 1)]",
+      "friendlyResponse": "Fortran has the least number of designers, with just one.",
+      "error": "near \"ite\": syntax error"
+    },
+    {
+      "context": "I asked a question \"What are the languages that have release dates that are not in January?\" and the response was \"[('Go',), ('Python',), ('Java',)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nSure! Go, Python, and Java have release dates that aren't in January.\nI asked a question \"Which style is the most unique?\" and the response was \"[('01',)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nThe most unique style is \"01.\"\nI asked a question \"Which language has the least amount of designers?\" and the response was \"[('Fortran', 1)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nFortran has the least number of designers, with just one.\nI asked a question \"Which language is the most similar to another language?\" and the response was \"[('01', 3)]\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter.\nLanguage \"01\" is the most similar to another language, with a similarity score of 3.\n",
+      "question": "Which language is the most similar to another language?",
+      "sql": "\nSELECT strftime('%m', birthDate) AS month, COUNT(*) AS count\nFROM Creator\nGROUP BY month\nHAVING count = (\n    SELECT MAX(month_count)\n    FROM (\n        SELECT COUNT(*) AS month_count\n        FROM Creator\n        GROUP BY strftime('%m', birthDate)\n    )\n);\n",
+      "queryRawResponse": "[('01', 3)]",
+      "friendlyResponse": "Language \"01\" is the most similar to another language, with a similarity score of 3.",
+      "error": "None"
+    }
+  ]
+}

@@ -46,7 +46,7 @@ openAiClient = OpenAI(api_key = config["openaiKey"])
 
 def getChatGptResponse(content):
     stream = openAiClient.chat.completions.create(
-        model="gpt-4o",
+        model="o1-mini",
         messages=[{"role": "user", "content": content}],
         stream=True,
     )
@@ -61,25 +61,24 @@ def getChatGptResponse(content):
 
 
 # strategies
-commonSqlOnlyRequest = " Give me a sqlite select statement that answers the question. Only respond with sqlite syntax. If there is an error do not expalin it!"
+commonSqlOnlyRequest = " Give me a sqlite select statement that answers the question. Only respond with sqlite syntax. If there is an error do not expalain it!"
 strategies = {
     "zero_shot": setupSqlScript + commonSqlOnlyRequest,
-    "single_domain_double_shot": (setupSqlScript + 
-                   " Who doesn't have a way for us to text them? " + 
-                   " \nSELECT p.person_id, p.name\nFROM person p\nLEFT JOIN phone ph ON p.person_id = ph.person_id AND ph.can_recieve_sms = 1\nWHERE ph.phone_id IS NULL;\n " +
+    "multi_shot": (setupSqlScript + 
+                   " What are the most common birth months for language creators? " + 
+                   " \nSELECT TOP(1) WITH TIES, MONTH(birthDate)\nFROM Creator " +
                    commonSqlOnlyRequest)
 }
 
 questions = [
-    "Which are the most awarded dogs?",
-    "Which dogs have multiple owners?",
-    "Which people have multiple dogs?",
-    "What are the top 3 cities represented?",
-    "What are the names and cities of the dogs who have awards?",
-    "Who has more than one phone number?",
-    "Who doesn't have a way for us to text them?",
-    "Will we have a problem texting any of the previous award winners?"
-    # "I need insert sql into my tables can you provide good unique data?"
+        "What are the languages that have release dates that are not in January?",
+        "What is the most popular language paradigm?",
+        "Which style is the most popular?",
+        "Which style is the most unique?",
+        "Which programming language has the median release date?",
+        "Which language has the least amount of designers?",
+        "Which language has the most amount of designers?",
+        "Which language is the most similar to another language?",
 ]
 
 def sanitizeForJustSql(value):
@@ -95,6 +94,7 @@ def sanitizeForJustSql(value):
 for strategy in strategies:
     responses = {"strategy": strategy, "prompt_prefix": strategies[strategy]}
     questionResults = []
+    context = ""
     for question in questions:
         print(question)
         error = "None"
@@ -105,13 +105,15 @@ for strategy in strategies:
             queryRawResponse = str(runSql(sqlSyntaxResponse))
             print(queryRawResponse)
             friendlyResultsPrompt = "I asked a question \"" + question +"\" and the response was \""+queryRawResponse+"\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter."
-            friendlyResponse = getChatGptResponse(friendlyResultsPrompt)
+            friendlyResponse = getChatGptResponse(context + friendlyResultsPrompt)
             print(friendlyResponse)
+            context += friendlyResultsPrompt + '\n' + friendlyResponse + '\n'
         except Exception as err:
             error = str(err)
             print(err)
 
         questionResults.append({
+            "context": context,
             "question": question, 
             "sql": sqlSyntaxResponse, 
             "queryRawResponse": queryRawResponse,
